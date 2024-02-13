@@ -83,65 +83,33 @@ const NotificationForm = () => {
   }, [selectedPayload]); // Add selectedPayload as a dependency
 
   const handleTemplateTextChange = (selectedTemplateValue) => {
-    let newTemplateText = '';
-    
-    if (selectedSubscribers.length > 0) {
-      const subscriber = selectedSubscribers[0];
-    
-      if (subscriber) {
-        const subscriberName = subscriber.label;
-        // Construct the template text based on the selected type and template option
-        switch (selectedType.toLowerCase()) {
-          case 'promotion':
-            newTemplateText = `Hi ${subscriberName}, you have been promoted to ${selectedTemplateValue}.`;
-            break;
-          case 'birthday':
-            switch (selectedTemplateValue.toLowerCase()) {
-              case 'happy birthday':
-                newTemplateText = `Hi ${subscriberName}, Happy Birthday!`;
-                break;
-              case 'many many happy returns of the day':
-                newTemplateText = `Hi ${subscriberName}, Many Many Happy Returns of the Day!`;
-                break;
-              case 'hope you achieve great heights in your life':
-                newTemplateText = `Hi ${subscriberName}, Hope you achieve great heights in your life!`;
-                break;
-              default:
-                break;
-            }
-            break;
-          case 'welcome':
-            switch (selectedTemplateValue.toLowerCase()) {
-              case 'fresher':
-                newTemplateText = `Hi ${subscriberName}, this is your first step in your career.`;
-                break;
-              case 'experienced':
-                newTemplateText = `Hi ${subscriberName}, we need an experienced professional like you.`;
-                break;
-              default:
-                break;
-            }
-            break;
-          default:
-            break;
-        }
-      }
-    } else {
-      // If no subscriber is selected, set the template text based on type and template
+    // Initialize an empty string to store the combined template text
+    let combinedTemplateText = '';
+  
+    // Loop through each selected subscriber
+    //we iterate over each selected subscriber using selectedSubscribers.forEach. 
+     //For each subscriber, we construct a new template text based on 
+     //the selected type and template option
+    selectedSubscribers.forEach(subscriber => {
+      let newTemplateText = '';
+  
+      const subscriberName = subscriber.label;
+  
+      // Construct the template text based on the selected type and template option
       switch (selectedType.toLowerCase()) {
         case 'promotion':
-          newTemplateText = `You have been promoted to ${selectedTemplateValue}.`;
+          newTemplateText = `Hi ${subscriberName}, you have been promoted to ${selectedTemplateValue}.`;
           break;
         case 'birthday':
           switch (selectedTemplateValue.toLowerCase()) {
             case 'happy birthday':
-              newTemplateText = `Happy Birthday!`;
+              newTemplateText = `Hi ${subscriberName}, Happy Birthday!`;
               break;
             case 'many many happy returns of the day':
-              newTemplateText = `Many Many Happy Returns of the Day!`;
+              newTemplateText = `Hi ${subscriberName}, Many Many Happy Returns of the Day!`;
               break;
             case 'hope you achieve great heights in your life':
-              newTemplateText = `Hope you achieve great heights in your life!`;
+              newTemplateText = `Hi ${subscriberName}, Hope you achieve great heights in your life!`;
               break;
             default:
               break;
@@ -150,10 +118,10 @@ const NotificationForm = () => {
         case 'welcome':
           switch (selectedTemplateValue.toLowerCase()) {
             case 'fresher':
-              newTemplateText = `This is your first step in your career.`;
+              newTemplateText = `Hi ${subscriberName}, this is your first step in your career.`;
               break;
             case 'experienced':
-              newTemplateText = `We need an experienced professional like you.`;
+              newTemplateText = `Hi ${subscriberName}, we need an experienced professional like you.`;
               break;
             default:
               break;
@@ -162,16 +130,26 @@ const NotificationForm = () => {
         default:
           break;
       }
-    }
   
-    // Append payload to template text
-    if (selectedPayload) {
-      newTemplateText += `, with regards ${selectedPayload}`;
-    }
-    
-    console.log("New template text:", newTemplateText); // Log the new template text
-    setTemplateText(newTemplateText);
+      // Append payload to template text
+      if (selectedPayload) {
+        newTemplateText += `, with regards ${selectedPayload}`;
+      }
+  
+      // Concatenate the new template text with the combined template text
+      //we concatenate each new template text to a combinedTemplateText string variable. 
+      //This variable accumulates all the individual template texts for each 
+      // selected subscriber.
+      combinedTemplateText += newTemplateText + '\n';
+    });
+  
+    // Log the combined template text
+    console.log("New template text:", combinedTemplateText);
+  
+    // Update the template text state with the combined template text
+    setTemplateText(combinedTemplateText);
   };
+  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
