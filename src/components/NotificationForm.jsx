@@ -1,4 +1,3 @@
-// NotificationForm.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TemplateDropdown from './TemplateDropdown';
@@ -35,6 +34,7 @@ const NotificationForm = () => {
         console.error('Error fetching subscribers:', error);
       });
   }, []);
+  
   useEffect(() => {
     if (selectedType) {
       switch (selectedType.toLowerCase()) {
@@ -68,11 +68,109 @@ const NotificationForm = () => {
   }, [selectedType]);
 
   const handleTemplateChange = (event) => {
-    setSelectedTemplate(event.target.value);
+    const selectedTemplateValue = event.target.value;
+    setSelectedTemplate(selectedTemplateValue);
+    handleTemplateTextChange(selectedTemplateValue); // Call the function to update template text
   };
 
-  const handleTemplateTextChange = (event) => {
-    setTemplateText(event.target.value);
+  useEffect(() => {
+    handleTemplateTextChange(selectedTemplate); // Call handleTemplateTextChange when selectedSubscribers change
+  }, [selectedSubscribers]); // Add selectedSubscribers as a dependency
+  
+  useEffect(() => {
+    // Call handleTemplateTextChange when selectedPayload changes
+    handleTemplateTextChange(selectedTemplate);
+  }, [selectedPayload]); // Add selectedPayload as a dependency
+
+  const handleTemplateTextChange = (selectedTemplateValue) => {
+    let newTemplateText = '';
+    
+    if (selectedSubscribers.length > 0) {
+      const subscriber = selectedSubscribers[0];
+    
+      if (subscriber) {
+        const subscriberName = subscriber.label;
+        // Construct the template text based on the selected type and template option
+        switch (selectedType.toLowerCase()) {
+          case 'promotion':
+            newTemplateText = `Hi ${subscriberName}, you have been promoted to ${selectedTemplateValue}.`;
+            break;
+          case 'birthday':
+            switch (selectedTemplateValue.toLowerCase()) {
+              case 'happy birthday':
+                newTemplateText = `Hi ${subscriberName}, Happy Birthday!`;
+                break;
+              case 'many many happy returns of the day':
+                newTemplateText = `Hi ${subscriberName}, Many Many Happy Returns of the Day!`;
+                break;
+              case 'hope you achieve great heights in your life':
+                newTemplateText = `Hi ${subscriberName}, Hope you achieve great heights in your life!`;
+                break;
+              default:
+                break;
+            }
+            break;
+          case 'welcome':
+            switch (selectedTemplateValue.toLowerCase()) {
+              case 'fresher':
+                newTemplateText = `Hi ${subscriberName}, this is your first step in your career.`;
+                break;
+              case 'experienced':
+                newTemplateText = `Hi ${subscriberName}, we need an experienced professional like you.`;
+                break;
+              default:
+                break;
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    } else {
+      // If no subscriber is selected, set the template text based on type and template
+      switch (selectedType.toLowerCase()) {
+        case 'promotion':
+          newTemplateText = `You have been promoted to ${selectedTemplateValue}.`;
+          break;
+        case 'birthday':
+          switch (selectedTemplateValue.toLowerCase()) {
+            case 'happy birthday':
+              newTemplateText = `Happy Birthday!`;
+              break;
+            case 'many many happy returns of the day':
+              newTemplateText = `Many Many Happy Returns of the Day!`;
+              break;
+            case 'hope you achieve great heights in your life':
+              newTemplateText = `Hope you achieve great heights in your life!`;
+              break;
+            default:
+              break;
+          }
+          break;
+        case 'welcome':
+          switch (selectedTemplateValue.toLowerCase()) {
+            case 'fresher':
+              newTemplateText = `This is your first step in your career.`;
+              break;
+            case 'experienced':
+              newTemplateText = `We need an experienced professional like you.`;
+              break;
+            default:
+              break;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  
+    // Append payload to template text
+    if (selectedPayload) {
+      newTemplateText += `, with regards ${selectedPayload}`;
+    }
+    
+    console.log("New template text:", newTemplateText); // Log the new template text
+    setTemplateText(newTemplateText);
   };
 
   const handleSubmit = async (event) => {
@@ -134,8 +232,9 @@ const NotificationForm = () => {
             <>
               <div className="mb-3">
                 <label htmlFor="templateText" className="form-label">Template Text:</label>
-                <input type="text" id="templateText" className="form-control" value={templateText} onChange={handleTemplateTextChange} />
+                <input type="text" id="templateText" className="form-control" value={templateText} readOnly />
               </div>
+
               <TemplateDropdown
                 selectedTemplate={selectedTemplate}
                 setSelectedTemplate={setSelectedTemplate}
