@@ -75,11 +75,11 @@ const NotificationForm = () => {
 
   useEffect(() => {
     handleTemplateTextChange(selectedTemplate); // Call handleTemplateTextChange when selectedSubscribers change
-  }, [selectedSubscribers]); // Add selectedSubscribers as a dependency
+  }, [selectedSubscribers, selectedTemplate]); // Add selectedSubscribers and selectedTemplate as dependencies
   
   useEffect(() => {
     // Call handleTemplateTextChange when selectedPayload changes
-    handleTemplateTextChange(selectedTemplate);
+    handleTemplateTextChange(selectedPayload);
   }, [selectedPayload]); // Add selectedPayload as a dependency
 
   const handleTemplateTextChange = (selectedTemplateValue) => {
@@ -87,9 +87,6 @@ const NotificationForm = () => {
     let combinedTemplateText = '';
   
     // Loop through each selected subscriber
-    //we iterate over each selected subscriber using selectedSubscribers.forEach. 
-     //For each subscriber, we construct a new template text based on 
-     //the selected type and template option
     selectedSubscribers.forEach(subscriber => {
       let newTemplateText = '';
   
@@ -137,19 +134,15 @@ const NotificationForm = () => {
       }
   
       // Concatenate the new template text with the combined template text
-      //we concatenate each new template text to a combinedTemplateText string variable. 
-      //This variable accumulates all the individual template texts for each 
-      // selected subscriber.
       combinedTemplateText += newTemplateText + '\n';
     });
   
     // Log the combined template text
-    console.log("New template text:", combinedTemplateText);
+    console.log("Combined template text:", combinedTemplateText);
   
     // Update the template text state with the combined template text
     setTemplateText(combinedTemplateText);
   };
-  
 
   const handleSubmit = async (event) => {
     event.preventDefault();
