@@ -146,43 +146,98 @@ const NotificationForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    let notificationMessage = selectedTemplate;
-
-    if (selectedPayload) {
-      notificationMessage += ` With Regards ${selectedPayload}`;
+  
+    if (!selectedSubscribers.length) {
+      console.error('No subscribers selected.');
+      return;
     }
-
-    notificationMessage = templateText ? templateText : notificationMessage;
-
-    if (sendInstantly) {
-      try {
-        const response = await axios.post('http://localhost:3000/notification', {
+  
+    if (!selectedTemplate) {
+      console.error('No template selected.');
+      return;
+    }
+  
+    if (!selectedType) {
+      console.error('No type selected.');
+      return;
+    }
+  
+    if (!sendInstantly && (!scheduleDate || !scheduleTime)) {
+      console.error('Please select schedule date and time.');
+      return;
+    }
+  
+    try {
+      const notificationPromises = selectedSubscribers.map(async subscriber => {
+        let notificationMessage = '';
+  
+        switch (selectedType.toLowerCase()) {
+          case 'promotion':
+            notificationMessage = `Hi ${subscriber.label}, you have been promoted to ${selectedTemplate}.`;
+            break;
+          case 'birthday':
+            switch (selectedTemplate.toLowerCase()) {
+              case 'happy birthday':
+                notificationMessage = `Hi ${subscriber.label}, Happy Birthday!`;
+                break;
+              case 'many many happy returns of the day':
+                notificationMessage = `Hi ${subscriber.label}, Many Many Happy Returns of the Day!`;
+                break;
+              case 'hope you achieve great heights in your life':
+                notificationMessage = `Hi ${subscriber.label}, Hope you achieve great heights in your life!`;
+                break;
+              default:
+                break;
+            }
+            break;
+          case 'welcome':
+            switch (selectedTemplate.toLowerCase()) {
+              case 'fresher':
+                notificationMessage = `Hi ${subscriber.label}, this is your first step in your career.`;
+                break;
+              case 'experienced':
+                notificationMessage = `Hi ${subscriber.label}, we need an experienced professional like you.`;
+                break;
+              default:
+                break;
+            }
+            break;
+          default:
+            break;
+        }
+  
+        // Append payload to template text
+        if (selectedPayload) {
+          notificationMessage += `, with regards ${selectedPayload}`;
+        }
+  
+        return axios.post('http://localhost:3000/notification', {
           title: selectedType,
           description: notificationMessage,
-          subscribers: selectedSubscribers.map(subscriber => subscriber.id),
+          subscribers: [subscriber.id],
           payload: selectedPayload || null,
         });
-        console.log('Notification created successfully:', response.data);
-      } catch (error) {
-        console.error('Error creating notification:', error);
+      });
+  
+      if (sendInstantly) {
+        const responses = await Promise.all(notificationPromises);
+        console.log('Notifications created successfully:', responses);
+      } else {
+        const scheduledResponses = await Promise.all(notificationPromises.map(async (promise) => {
+          const response = await promise;
+          return axios.post('http://localhost:3000/schedule-notification', {
+            ...response.data, // Assuming response.data contains necessary information
+            scheduleDate,
+            scheduleTime,
+          });
+        }));
+        console.log('Notifications scheduled successfully:', scheduledResponses);
       }
-    } else {
-      try {
-        const response = await axios.post('http://localhost:3000/schedule-notification', {
-          title: selectedType,
-          description: notificationMessage,
-          subscribers: selectedSubscribers.map(subscriber => subscriber.id),
-          payload: selectedPayload || null,
-          scheduleDate,
-          scheduleTime,
-        });
-        console.log('Notification scheduled successfully:', response.data);
-      } catch (error) {
-        console.error('Error scheduling notification:', error);
-      }
+    } catch (error) {
+      console.error('Error creating/scheduling notifications:', error);
     }
   };
+  
 
   return (
     <div className='container mt-5'>
