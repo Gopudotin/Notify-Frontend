@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
+import { Link } from 'react-router-dom';
 
-const NotificationForm = () => {
+const CreateNotificationForm = ({ onViewSubscribers }) => {
   const [selectedType, setSelectedType] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [selectedSubscribers, setSelectedSubscribers] = useState([]);
@@ -12,8 +13,6 @@ const NotificationForm = () => {
   const [subscriberOptions, setSubscriberOptions] = useState([]);
   const [scheduledDate, setScheduledDate] = useState('');
   const [scheduledTime, setScheduledTime] = useState('');
-  const [subscriberDetails, setSubscriberDetails] = useState(null);
-  const [showSubscriberList, setShowSubscriberList] = useState(false);
 
   useEffect(() => {
     // Fetch notification types
@@ -51,26 +50,9 @@ const NotificationForm = () => {
       .catch(error => console.error('Error fetching templates by type:', error));
   };
 
-  const fetchSubscriberDetails = (subscriberId) => {
-    axios.get(`http://localhost:3000/subscriber/${subscriberId}`)
-      .then(response => {
-        setSubscriberDetails(response.data);
-      })
-      .catch(error => console.error('Error fetching subscriber details:', error));
-  };
-
   const handleTypeChange = (option) => {
     setSelectedType(option.value);
     fetchTemplatesByType(option.value);
-  };
-
-  const handleSubscriberChange = (options) => {
-    setSelectedSubscribers(options || []);
-    if (options && options.length > 0) {
-      fetchSubscriberDetails(options[0].value);
-    } else {
-      setSubscriberDetails(null);
-    }
   };
 
   const handleSubmit = async (event) => {
@@ -92,33 +74,8 @@ const NotificationForm = () => {
     }
   };
 
-  const handleViewNotifications = () => {
-    // Implement logic to view notifications for the selected subscriber
-    console.log('Viewing notifications for subscriber:', selectedSubscribers);
-  };
-
-  const toggleSubscriberList = () => {
-    setShowSubscriberList(!showSubscriberList);
-  };
-
   return (
     <div className="container mt-5">
-      <div className="d-flex justify-content-end mb-3">
-        <button className="btn btn-outline-primary" onClick={toggleSubscriberList}>View Subscribers</button>
-      </div>
-      {showSubscriberList && (
-        <div className="mb-3">
-          <h3>Subscribers List</h3>
-          <Select
-            id="subscribers"
-            value={selectedSubscribers}
-            onChange={handleSubscriberChange}
-            options={subscriberOptions}
-            isMulti
-            closeMenuOnSelect={false}
-          />
-        </div>
-      )}
       <h2 className="text-center mb-4">Create Notification</h2>
       <div className="rounded bg-white border shadow p-4">
         <form onSubmit={handleSubmit}>
@@ -142,6 +99,18 @@ const NotificationForm = () => {
             />
           </div>
 
+          <div className="mb-3">
+            <label htmlFor="subscribers" className="form-label">Subscribers:</label>
+            <Select
+              id="subscribers"
+              value={selectedSubscribers}
+              onChange={setSelectedSubscribers}
+              options={subscriberOptions}
+              isMulti
+              closeMenuOnSelect={false}
+            />
+          </div>
+
           <div className="mb-3 form-check">
             <input type="checkbox" className="form-check-input" id="sendInstantly" checked={sendInstantly} onChange={(e) => setSendInstantly(e.target.checked)} />
             <label className="form-check-label" htmlFor="sendInstantly">Send Instantly</label>
@@ -162,24 +131,12 @@ const NotificationForm = () => {
 
           <div className="d-grid gap-2">
             <button type="submit" className="btn btn-primary">Create Notification</button>
-            <button type="button" className="btn btn-outline-primary" onClick={handleViewNotifications} disabled={!selectedSubscribers || selectedSubscribers.length === 0}>View Notifications</button>
+            <Link to="/view-subscribers" className="btn btn-outline-primary">View Subscribers</Link>
           </div>
         </form>
       </div>
-
-      {subscriberDetails && (
-        <div className="mt-5">
-          <h2 className="text-center mb-4">Subscriber Details</h2>
-          <div className="rounded bg-white border shadow p-4">
-            <p><strong>Name:</strong> {subscriberDetails.name}</p>
-            <p><strong>ID</strong> {subscriberDetails.id}</p>
-            <p><strong>Created At:</strong> {subscriberDetails.created_at}</p>
-            
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default NotificationForm;
+export default CreateNotificationForm;
