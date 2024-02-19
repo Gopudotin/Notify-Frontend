@@ -31,7 +31,7 @@ const ViewSubscribersPage = () => {
     try {
       const response = await axios.get(`http://localhost:3000/subscriber/${selectedOption.value}`);
       setSubscriberDetails(response.data);
-      setSubscriberNotifications([]); // Clear previous notifications when selecting a new subscriber
+      setSubscriberNotifications([]);
     } catch (error) {
       console.error('Error fetching subscriber details:', error);
     }
@@ -50,8 +50,7 @@ const ViewSubscribersPage = () => {
 
   const handleMarkAsRead = async (notificationId) => {
     try {
-      await axios.put(`http://localhost:3000/subscriber/${selectedSubscriber.value}/notifications/${notificationId}/read`);
-      // After marking as read, update the notification status in the UI
+      await axios.put(`http://localhost:3000/sub-notification/read/${selectedSubscriber.value}/${notificationId}`);
       const updatedNotifications = subscriberNotifications.map(notification => {
         if (notification.id === notificationId) {
           return { ...notification, has_read: true };
@@ -68,44 +67,28 @@ const ViewSubscribersPage = () => {
     <div className="container mt-5">
       <h2 className="text-center mb-4">View Subscribers</h2>
       <div className="mb-3">
-        <Select
-          id="subscribers"
-          value={selectedSubscriber}
-          onChange={handleSelectSubscriber}
-          options={subscriberOptions}
-          isClearable
-        />
+        <Select id="subscribers" value={selectedSubscriber} onChange={handleSelectSubscriber} options={subscriberOptions} isClearable />
       </div>
       {selectedSubscriber && (
         <div>
           <SubscriberDetails subscriberDetails={subscriberDetails} />
-          <button className="btn btn-outline-primary" onClick={handleViewNotifications}>View Notifications</button>
+          <button className="btn btn-outline-primary view-notification-button" onClick={handleViewNotifications}>View Notifications</button>
         </div>
       )}
-      
       {subscriberNotifications.length > 0 && (
-  <div>
-    <h3>Notifications:</h3>
-    <ul>
-      {subscriberNotifications.map(notification => {
-        console.log('Notification:', notification); // Log the entire notification object
-        console.log('Title:', notification.notification.title); // Log the title
-        console.log('Description:', notification.notification.description); // Log the description
-        console.log('Type:', notification.notification.type); // Log the type
-        return (
-          <li key={notification.id}>
-            <strong>Title:</strong> {notification.notification.title}<br />
-            <strong>Description:</strong> {notification.notification.description}<br />
-            <strong>Type:</strong> {notification.notification.type}<br />
-            <button onClick={() => handleMarkAsRead(notification.id)} disabled={notification.has_read}>Mark as Read</button>
-          </li>
-        );
-      })}
-    </ul>
-  </div>
-)}
-
-
+        <div>
+          <h3>Notifications:</h3>
+          <ul>
+            {subscriberNotifications.map(notification => (
+              <li key={notification.id}>
+                <strong>Title:</strong> {notification.notification.title}<br />
+                <strong>Description:</strong> {notification.notification.description}<br />
+                <button onClick={() => handleMarkAsRead(notification.notification_id)} disabled={notification.has_read} className="btn btn-outline-primary viewMark">Mark as Read</button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
