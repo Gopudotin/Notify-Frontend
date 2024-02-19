@@ -1,9 +1,10 @@
+// CreateNotificationForm.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Select from 'react-select';
 import { Link } from 'react-router-dom';
 
-const CreateNotificationForm = ({ onViewSubscribers }) => {
+const CreateNotificationForm = () => {
   const [selectedType, setSelectedType] = useState('');
   const [selectedTemplate, setSelectedTemplate] = useState('');
   const [selectedSubscribers, setSelectedSubscribers] = useState([]);

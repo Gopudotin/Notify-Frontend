@@ -2,6 +2,11 @@ import React from 'react';
 import './SubscriberDetails.css';
 
 const SubscriberDetails = ({ subscriberDetails }) => {
+ 
+  if (!subscriberDetails) {
+    return null;
+  }
+
   return (
     <div className="container mt-5">
       <h5 className="subscriber-details-heading">Subscriber Details</h5>
