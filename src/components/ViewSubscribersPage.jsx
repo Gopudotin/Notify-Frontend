@@ -58,6 +58,7 @@ const ViewSubscribersPage = () => {
         return notification;
       });
       setSubscriberNotifications(updatedNotifications);
+      alert('Notification marked as read successfully');
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
